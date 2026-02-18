@@ -1,9 +1,9 @@
 /*  Part of SWI-Prolog
 
     Author:        Jan Wielemaker
-    E-mail:        J.Wielemaker@vu.nl
+    E-mail:        jan@swi-prolog.org
     WWW:           http://www.swi-prolog.org
-    Copyright (c)  2008-2025, University of Amsterdam
+    Copyright (c)  2008-2026, University of Amsterdam
 			      VU University Amsterdam
 			      SWI-Prolog Solutions b.v.
     All rights reserved.
@@ -622,7 +622,7 @@ PL_EXPORT(bool)		PL_put_functor(term_t t, functor_t functor) WUNUSED;
 PL_EXPORT(bool)		PL_put_list(term_t l) WUNUSED;
 PL_EXPORT(bool)		PL_put_nil(term_t l);
 PL_EXPORT(bool)		PL_put_term(term_t t1, term_t t2) WUNUSED;
-PL_EXPORT(int)		PL_put_dict(term_t t, atom_t tag, size_t len,
+PL_EXPORT(bool)		PL_put_dict(term_t t, atom_t tag, size_t len,
 				    const atom_t *keys, term_t values) WUNUSED;
 PL_EXPORT(atom_t)	_PL_cons_small_int(int64_t v);
 PL_EXPORT(void)		_PL_unregister_keys(size_t len, atom_t *keys);

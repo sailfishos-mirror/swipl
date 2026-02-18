@@ -366,6 +366,7 @@ add_custom_command(
     DEPENDS ${DEP_SWIPL_FOR_BOOT}
 )
 add_custom_target(bootfile DEPENDS ${SWIPL_BOOT_FILE} ${SWIPL_ABI_FILE})
+add_dependencies(bootfile prolog_home) # boot/tabling.pl needs library(debug)
 
 # Update library `INDEX.pl` files
 
@@ -546,6 +547,7 @@ endif()
 if(LIBSWIPL_TYPE STREQUAL "SHARED")
   set_property(TARGET swiplobjs${PGO_SUFFIX} PROPERTY POSITION_INDEPENDENT_CODE 1)
 endif()
+target_compile_definitions(swiplobjs${PGO_SUFFIX} PRIVATE BUILD_TYPE="$<CONFIG>")
 add_dependencies(swiplobjs${PGO_SUFFIX} vmi-metadata core-constants)
 target_include_directories(swiplobjs${PGO_SUFFIX} BEFORE PRIVATE
 			   ${CMAKE_CURRENT_BINARY_DIR}

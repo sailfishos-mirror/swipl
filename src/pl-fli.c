@@ -1,9 +1,9 @@
 /*  Part of SWI-Prolog
 
     Author:        Jan Wielemaker
-    E-mail:        J.Wielemaker@vu.nl
-    WWW:           http://www.swi-prolog.org
-    Copyright (c)  1996-2024, University of Amsterdam
+    E-mail:        jan@swi-prolog.org
+    WWW:           https://www.swi-prolog.org
+    Copyright (c)  1996-2026, University of Amsterdam
 			      VU University Amsterdam
 			      CWI, Amsterdam
 			      SWI-Prolog Solutions b.v.
@@ -4196,53 +4196,52 @@ PL_free_blob(atom_t a)
 		 *	       DICT		*
 		 *******************************/
 
-int				/* false, true, -1 */
+bool
 PL_put_dict(term_t t, atom_t tag,
 	    size_t len, const atom_t *keys, term_t values)
 { GET_LD
   Word p, p0;
   size_t size = len*2+2;
-  size_t i;
 
   valid_user_term_t(t);
   if ( tag )
     valid_atom_t(tag);
-  for(i=0; i<len; i++)
-  { valid_term_t(values+i);
+  for(size_t i=0; i<len; i++)
+  { if ( !isTaggedInt(keys[i]) )
+      valid_atom_t(keys[i]);
+    valid_term_t(values+i);
     if ( !globalizeTermRef(values+i) )
-      return false;
+      return false; /* resource error */
   }
 
   if ( (p0=p=allocGlobal(size)) )
   { *p++ = dict_functor(len);
     if ( tag )
-    { if ( isAtom(tag) )
-      { *p++ = tag;
-      } else
-      { invalid:
-	gTop -= size;
-	return -1;
-      }
+    { *p++ = tag;
     } else
     { setVar(*p++);
     }
 
     for(; len-- > 0; keys++, values++)
     { *p++ = linkValI(valTermRef(values));
-      if ( is_dict_key(*keys) )
-	*p++ = *keys;
-      else
-	goto invalid;
+      *p++ = *keys;
     }
 
-    if ( dict_order(p0, NULL) == true )
+    word dupl = 0;
+    _PL_dict_status_t rc = dict_order(p0, &dupl);
+    if ( rc == PL_DICT_TRUE )
     { setHandle(t, consPtr(p0, TAG_COMPOUND|STG_GLOBAL));
       DEBUG(CHK_SECURE, checkStacks(NULL));
       return true;
     }
 
     gTop -= size;
-    return -2;
+
+    /* throw error(duplicate_key(Key), _) */
+    term_t t;
+    return ( (t=PL_new_term_ref()) &&
+	     (*valTermRef(t) = dupl) &&
+	     PL_error(NULL, 0, NULL, ERR_DUPLICATE_KEY, t) );
   }
 
   return false;
